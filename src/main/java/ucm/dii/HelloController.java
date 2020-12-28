@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -53,7 +54,7 @@ public class HelloController {
     }
     
     @GetMapping("/register/{event}")
-    public void getHearts(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
+    public void registerEvent(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
     	if (password=="mypassword") {
     	 eventos_usuarios.put(evento, new Hashtable<String,Date>());
     	 eventos_intensity.put(evento, new Hashtable<String,Integer>());
@@ -62,10 +63,11 @@ public class HelloController {
     
     @GetMapping("/gethearts/{event}")
     @ResponseBody
-    public String getHearts(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
+    public Map<String,Integer> getHearts(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
     	if (password=="mypassword") {
     		 return eventos_intensity.get(evento);
     	}
+    	return new Hashtable<String,Integer>();
         
     }
 
