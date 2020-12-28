@@ -36,7 +36,7 @@ public class HelloController {
     		usuarios.put(usuario, new Date());
     		intensity.put(usuario,0);
     	} else {
-    		if (new Date().getTime()-usuarios.get(usuario).getTime()<2000)
+    		if (new Date().getTime()-usuarios.get(usuario).getTime()<20000)
     			intensity.put(usuario,intensity.get(usuario)+1);
     		else
     			intensity.put(usuario,0);
@@ -55,7 +55,7 @@ public class HelloController {
     
     @GetMapping("/register/{event}")
     public void registerEvent(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
-    	if (password=="mypassword") {
+    	if (password.equals("mypassword")) {
     	 eventos_usuarios.put(evento, new Hashtable<String,Date>());
     	 eventos_intensity.put(evento, new Hashtable<String,Integer>());
     	} 
@@ -64,7 +64,7 @@ public class HelloController {
     @GetMapping("/gethearts/{event}")
     @ResponseBody
     public Map<String,Integer> getHearts(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
-    	if (password=="mypassword") {
+    	if (password.equals("mypassword")) {
     		 return eventos_intensity.get(evento);
     	}
     	return new Hashtable<String,Integer>();
