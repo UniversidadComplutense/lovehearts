@@ -73,8 +73,7 @@ public class HelloController {
     		Hashtable<String, Integer> intensity = eventos_intensity.get(evento);
     		HashSet<String> usuariostemp = new HashSet<String>(usuarios.keySet());
     		
-        	for (String actual:usuariostemp) {
-        		System.err.println(new Date().getTime()-usuarios.get(actual).getTime());
+        	for (String actual:usuariostemp) {        		
         		long delay=new Date().getTime()-usuarios.get(actual).getTime();
         		if (delay>INTENSITY_WAIT*MAX_HEARTS) {        			
         			usuarios.remove(actual);

@@ -71,6 +71,8 @@
                             usuariosborrar = [];
                             for (let imagecounter = 0; imagecounter < usuariosx[key].length; imagecounter++) {
                                 ctx.drawImage(img, usuariosx[key][imagecounter], usuariosy[key][imagecounter]);
+                                ctx.font = '10px serif';
+                                ctx.strokeText(key,usuariosx[key][imagecounter], usuariosy[key][imagecounter]-20);
                                 usuariosy[key][imagecounter] = usuariosy[key][imagecounter] - 1;
                                 console.log(usuariosx[key]);
                                 if (usuariosy[key][imagecounter] < 0) {
