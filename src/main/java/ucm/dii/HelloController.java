@@ -2,13 +2,13 @@ package ucm.dii;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.Hashtable;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
-public class HelloCoDateller {
+public class HelloController {
 
 	Hashtable<String,Date> usuarios=new Hashtable<String,Date>();
 	Hashtable<String,Integer> intensity=new Hashtable<String,Integer>();
