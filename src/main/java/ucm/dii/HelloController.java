@@ -22,6 +22,8 @@ public class HelloController {
 	Hashtable<String, Hashtable<String,Integer>> eventos_intensity= new Hashtable<String, Hashtable<String,Integer>> ();
 	Hashtable<String, Date> lastAccess=new Hashtable<String, Date>();
 	
+	private static int MAX_HEARTS=20;
+	private static long INTENSITY_WAIT=2000;
     @RequestMapping("/")
     public String index() {
         return "Greetings from Spring Boot!! ";
@@ -36,15 +38,16 @@ public class HelloController {
     		usuarios.put(usuario, new Date());
     		intensity.put(usuario,0);
     	} else {
-    		if (new Date().getTime()-usuarios.get(usuario).getTime()<20000)
-    			intensity.put(usuario,intensity.get(usuario)+1);
-    		else
-    			intensity.put(usuario,0);
+    		
+    			usuarios.put(usuario, new Date());
+    			if (intensity.get(usuario)<MAX_HEARTS) // to not create too many balloons
+    				intensity.put(usuario,intensity.get(usuario)+1);
+    		
     	}
     	
     	HashSet<String> usuariostemp = new HashSet<String>(usuarios.keySet());
     	for (String actual:usuariostemp) {
-    		if (new Date().getTime()-usuarios.get(actual).getTime()>10000) {
+    		if (new Date().getTime()-usuarios.get(actual).getTime()>5000) {
     			usuarios.remove(actual);
     			intensity.remove(actual);
     		}
@@ -55,16 +58,39 @@ public class HelloController {
     
     @GetMapping("/register/{event}")
     public void registerEvent(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
-    	if (password.equals("mypassword")) {
+    	if (password.equals("mypassword") && !eventos_usuarios.containsKey(evento)) {
     	 eventos_usuarios.put(evento, new Hashtable<String,Date>());
     	 eventos_intensity.put(evento, new Hashtable<String,Integer>());
     	} 
     }
     
+    Hashtable<String, Date> lastCheck=new Hashtable<String, Date>(); 
     @GetMapping("/gethearts/{event}")
     @ResponseBody
-    public Map<String,Integer> getHearts(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
-    	if (password.equals("mypassword")) {
+    public synchronized Map<String,Integer> getHearts(@RequestParam(name="password")  String password, @PathVariable("event") String evento) {
+    	if (password.equals("mypassword")  && eventos_usuarios.containsKey(evento)) {
+    		Hashtable<String, Date> usuarios = eventos_usuarios.get(evento);
+    		Hashtable<String, Integer> intensity = eventos_intensity.get(evento);
+    		HashSet<String> usuariostemp = new HashSet<String>(usuarios.keySet());
+    		
+        	for (String actual:usuariostemp) {
+        		System.err.println(new Date().getTime()-usuarios.get(actual).getTime());
+        		long delay=new Date().getTime()-usuarios.get(actual).getTime();
+        		if (delay>INTENSITY_WAIT*MAX_HEARTS) {        			
+        			usuarios.remove(actual);
+        			intensity.remove(actual);
+        		} else { 
+        			if (lastCheck.containsKey(actual)) {
+        				if ((new Date().getTime()-lastCheck.get(actual).getTime())>INTENSITY_WAIT && intensity.get(actual)>0) {
+        					lastCheck.put(actual, new Date());
+        					intensity.put(actual,intensity.get(actual)-1);
+        				}
+        			}	else {
+        					lastCheck.put(actual, new Date());
+        			}
+        			 
+        		}
+        	}
     		 return eventos_intensity.get(evento);
     	}
     	return new Hashtable<String,Integer>();
