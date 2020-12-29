@@ -1,0 +1,150 @@
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+	<script src="https://rawgithub.com/soulwire/sketch.js/master/js/sketch.min.js"></script>
+</head>
+
+<body>
+	<canvas id="myCanvas" width=300 height=500></canvas>
+	<script>
+		window.addEventListener('load', function () {
+
+			var usuarios = {};
+			var usuariosObj = {};
+			
+			options = {
+				amount: 50,
+				sizeMin: 1,
+				sizeMax: 10,
+				timeDT:300
+			};
+			
+			ctx = document.getElementById('myCanvas').getContext('2d');
+
+			Heart = function (config) {
+				// reusing code from https://codepen.io/TimLamber/pen/vahmf
+				this.x = config.x;
+				this.y = config.y;
+				this.vx = 0;
+				this.vy = 0;
+				this.size = config.size;	
+				this.name=config.name;	
+				this.color="rgb(" + Math.random() * 255 + "," + Math.random() * 255 + "," + Math.random() * 255 + ",0.5)";		
+			};
+			
+		Heart.prototype.render = function () {
+				
+				ctx.fillStyle =this.color ;
+				ctx.strokeStyle = ctx.fillStyle;
+				//ctx.scale(this.size,this.size);
+				ctx.font = '10px serif';
+				ctx.beginPath();				
+				ctx.moveTo(this.x+30, this.y+30);				
+				ctx.bezierCurveTo(this.x+30, this.y+30, this.x+50, this.y+10, this.x+40, this.y+5);
+				ctx.bezierCurveTo(this.x+40, this.y+5, this.x+35,this.y+ 0, this.x+30, this.y+10);
+				ctx.moveTo(this.x+30, this.y+30);
+				ctx.bezierCurveTo(this.x+30, this.y+30, this.x+10, this.y+10, this.x+20, this.y+5);
+				ctx.bezierCurveTo(this.x+20, this.y+5, this.x+25, this.y+0, this.x+30, this.y+10);
+				ctx.stroke();				
+				ctx.fill();
+				//ctx.setTransform(1, 0, 0, 1, 0, 0);		
+				ctx.strokeText(this.name,this.x,this.y);
+				ctx.closePath();
+			};
+
+			Heart.prototype.update = function () {
+				// reusing code from https://codepen.io/TimLamber/pen/vahmf
+				var dt;
+				dt = options.timeDT <= 0 ? .001 : options.timeDT / 16;
+				this.vx += this.size * ((Math.random()*2-1) / 1000);
+				this.x += this.vx * dt;
+				this.vy -= this.size / 2000;
+				this.y += this.vy * dt;
+				if (this.y <= this.size * -0.9) {					
+					return true;
+				} else
+					return false;
+			};
+
+			
+
+
+			var interval = setInterval(function () {
+				var x = 0,
+					y = ctx.canvas.height;
+				return function () {
+					$.ajax({
+						url: "/gethearts/love?password=mypassword",
+						type: 'GET',
+						data: "",
+						dataType: 'json',
+						success: function (data) {
+							for (var key in usuarios)
+								if (!(key in data)) {
+									delete usuarios[key];
+									delete usuariosObj[key];
+								}
+							for (var key in data) {
+								if (!(key in usuarios)) {
+									usuariosObj[key]=[new Heart(
+														{x:Math.floor(Math.random() * ctx.canvas.width),
+														y:ctx.canvas.height,
+														size:Math.random()*options.sizeMax,
+														name:key})];															
+									usuarios[key] = data[key];
+								} else {
+									usuarios[key] = data[key];
+									//console.log(usuariosx[key][0]);
+									//console.log("prueba"+Math.floor(Math.random()*ctx.canvas.width));
+									if ((usuariosObj[key].length) < usuarios[key]) {
+										if (usuariosObj[key].length == 0) {
+											usuariosObj[key].push(new Heart(
+														{x:Math.floor(Math.random() * ctx.canvas.width),
+														y:ctx.canvas.height,
+														size:Math.random()*options.sizeMax,
+														name:key}));
+											
+										} else {
+											usuariosObj[key].push(new Heart(
+														{x:usuariosObj[key][0].x,
+														y:ctx.canvas.height,
+														size:Math.random()*options.sizeMax,
+														name:key}));
+										}
+									} else {
+										if (usuariosObj[key].length > usuarios[key]) {
+											usuariosObj[key].pop();											
+										}
+									}
+								}
+							}
+							//console.log(usuarios);
+							ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+							copia = {
+								...usuarios
+							};
+							for (var key in copia) {
+								usuariosborrar = [];
+								console.log(usuariosObj[key]);
+								for (let imagecounter = 0; 
+									imagecounter < usuariosObj[key].length; 
+									imagecounter++) {
+										ctx.lineTo(20, 20);
+										usuariosObj[key][imagecounter].render();									
+									if (usuariosObj[key][imagecounter].update())
+										usuariosborrar.push(imagecounter);
+								}
+								for (let index = usuariosborrar.length - 1; index >= 0; index = index - 1) {
+									usuariosObj[key].splice(usuariosObj[index], 1);									
+								}
+                        }
+                    }
+                });
+            };
+        }(), 1000 / 40);
+    }, false);
+
+	</script>
+</body>
